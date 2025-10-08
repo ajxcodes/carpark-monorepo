@@ -102,4 +102,4 @@ node_modules/
 Thumbs.db
 
 # Generated certificate
-projects/dotnet/certs/aspnetapp.pfx
+/certs/aspnetapp.pfx

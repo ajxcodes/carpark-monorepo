@@ -1,0 +1,47 @@
+name: car-park
+services:
+  dotnet:
+    container_name: "dotnet"
+    build:
+      context: .
+      dockerfile: projects/dotnet/src/CarPark.Api/Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - car-park-network
+    ports:
+      - "7175:7175"
+      - "5118:5118"
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
+      ASPNETCORE_URLS: "http://+:5118;https://+:7175"
+      Kestrel__Certificates__Default__Path: "/home/app/.aspnet/https/aspnetapp.pfx"
+      Kestrel__Certificates__Default__Password: "your_secure_dev_password"
+    volumes:
+      - ./projects/dotnet/certs/aspnetapp.pfx:/home/app/.aspnet/https/aspnetapp.pfx:z
+  db:
+    container_name: "db"
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: "carpark"
+      POSTGRES_USER: "admin"
+      POSTGRES_PASSWORD: "admin"
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - car-park-network
+
+volumes:
+  db-data: null
+
+networks:
+  car-park-network:
+    driver: bridge

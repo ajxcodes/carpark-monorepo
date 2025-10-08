@@ -1,0 +1,78 @@
+<!-- src/app/app.component.html -->
+
+<main class="container">
+  <header>
+    <h1>My Car Park</h1>
+    <!-- Check if spacesStatus has data before trying to display it -->
+    @if (spacesStatus) {
+      <article>
+        <p>Available Spaces: <strong>{{ spacesStatus.availableSpaces }}</strong></p>
+        <p>Occupied Spaces: <strong>{{ spacesStatus.occupiedSpaces }}</strong></p>
+      </article>
+    } @else {
+      <!-- This block shows while data is loading or if it fails -->
+      <p><progress indeterminate></progress>Loading parking status...</p>
+    }
+  </header>
+
+  <div class="grid">
+    <article>
+      <hgroup>
+        <h2>Park a Vehicle</h2>
+        <h3>Enter vehicle details to park.</h3>
+      </hgroup>
+        <form [formGroup]="parkForm" (ngSubmit)="onParkSubmit()">
+          <label for="park-reg">Vehicle Registration</label>
+          <input id="park-reg" formControlName="vehicleReg" placeholder="e.g., AB12 CDE" required />
+
+          <label for="park-type">Vehicle Type</label>
+          <select id="park-type" formControlName="vehicleType" required>
+            @for(type of vehicleTypeOptions; track type.value) {
+              <option [value]="type.value">{{ type.name }}</option>
+            }
+          </select>
+          <button type="submit" [disabled]="parkForm.invalid" [attr.aria-busy]="isParking">Park Vehicle</button>
+        </form>
+    </article>
+
+    <article>
+      <hgroup>
+        <h2>Exit Car Park</h2>
+        <h3>Enter registration to calculate charge.</h3>
+      </hgroup>
+        <form [formGroup]="exitForm" (ngSubmit)="onExitSubmit()">
+          <label for="exit-reg">Vehicle Registration</label>
+          <input id="exit-reg" formControlName="vehicleReg" placeholder="e.g., AB12 CDE" required />
+          <button type="submit" [disabled]="exitForm.invalid" [attr.aria-busy]="isExiting">Exit Vehicle</button>
+        </form>
+    </article>
+  </div>
+
+  <section class="results">
+    @if (parkingResult) {
+      <article>
+        <h3>Vehicle Parked Successfully</h3>
+        <p>Registration: {{ parkingResult.vehicleReg }}</p>
+        <p>Space Number: {{ parkingResult.spaceNumber }}</p>
+        <p>Time In: {{ parkingResult.timeIn | date:'short' }}</p>
+      </article>
+    }
+    @if (exitResult) {
+      <article>
+        <h3>Vehicle Exited Successfully</h3>
+        <p>Registration: {{ exitResult.vehicleReg }}</p>
+        <p>Charge: {{ exitResult.vehicleCharge | currency:'GBP' }}</p>
+        <p>Time Out: {{ exitResult.timeOut | date:'short' }}</p>
+      </article>
+    }
+    @if (apiError) {
+      <article class="error-card">
+        <h3>An Error Occurred</h3>
+        <p>{{ apiError }}</p>
+      </article>
+    }
+  </section>
+
+  <!-- This is where your routed components will be displayed -->
+  <router-outlet></router-outlet>
+</main>

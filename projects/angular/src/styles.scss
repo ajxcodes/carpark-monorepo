@@ -1,0 +1,13 @@
+/* You can add global styles to this file, and also import other style files */
+
+// 1. Import Pico.css for base styling
+@import "@picocss/pico/css/pico.min.css";
+
+// 2. Custom styles for our application
+.error-card {
+  // Use Pico's CSS variables for consistency
+  border: 1px solid var(--pico-form-element-invalid-border-color);
+  background-color: var(--pico-form-element-invalid-background-color);
+  color: var(--pico-form-element-invalid-color);
+  border-radius: var(--pico-border-radius);
+}
