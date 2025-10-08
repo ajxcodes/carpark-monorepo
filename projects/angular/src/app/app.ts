@@ -1,115 +1,59 @@
 // src/app/app.component.ts
-import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RouterOutlet } from '@angular/router';
-import { finalize } from 'rxjs';
 import {
-  CarParkService,
-  SpacesResponse,
-  VehicleType,
   InitialParkingResponse,
   ParkingCompletedResponse
-} from './services/car-park';
+} from './services/car-park'; // Keep only the interfaces needed for results
+
+// Import the new components
+import { SpacesStatusComponent } from './components/spaces-status.component';
+import { ParkVehicleComponent } from './components/park-vehicle.component';
+import { ExitVehicleComponent } from './components/exit-vehicle.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, ReactiveFormsModule],
+  imports: [
+    CommonModule,
+    RouterOutlet,
+    SpacesStatusComponent, // Add new components to imports
+    ParkVehicleComponent,
+    ExitVehicleComponent
+  ],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
-export class App implements OnInit {
-  // Using the new `inject` function for dependency injection
-  private carParkService = inject(CarParkService);
-  private fb = inject(FormBuilder);
-  private cdr = inject(ChangeDetectorRef);
-
-  // A property to hold the parking space status.
-  // Initialize with null to handle the state before the API call completes.
-  public spacesStatus: SpacesResponse | null = null;
-
-  // ngOnInit is a lifecycle hook that runs once after the component is initialized
-  ngOnInit(): void {
-    this.getSpaces();
-
-    this.parkForm = this.fb.group({
-      vehicleReg: ['', Validators.required],
-      vehicleType: [VehicleType.Car, Validators.required]
-    });
-
-    this.exitForm = this.fb.group({
-      vehicleReg: ['', Validators.required]
-    });
-  }
-
-  // --- Form Properties ---
-  parkForm!: FormGroup;
-  exitForm!: FormGroup;
-  vehicleTypeOptions = [
-    { name: 'Car', value: VehicleType.Car },
-    { name: 'Motorbike', value: VehicleType.Motorbike },
-    { name: 'Van', value: VehicleType.Van }
-  ];
+export class App {
+  // Get a reference to the spaces status component to call its refresh method
+  @ViewChild(SpacesStatusComponent) spacesStatusComponent!: SpacesStatusComponent;
 
   // --- API Result Properties ---
   parkingResult: InitialParkingResponse | null = null;
   exitResult: ParkingCompletedResponse | null = null;
   apiError: string | null = null;
 
-  // --- UI State Properties ---
-  isParking = false;
-  isExiting = false;
-
-  getSpaces(): void {
-    this.carParkService.getSpacesStatus().subscribe(data => {
-      this.spacesStatus = data;
-      this.cdr.markForCheck(); // Manually trigger change detection
-    });
+  onVehicleParked(result: InitialParkingResponse): void {
+    this.resetState();
+    this.parkingResult = result;
+    this.spacesStatusComponent.refresh(); // Tell the status component to update
   }
 
-  onParkSubmit(): void {
-    if (this.parkForm.invalid || this.isParking) return;
+  onVehicleExited(result: ParkingCompletedResponse): void {
     this.resetState();
-    this.isParking = true;
-    this.carParkService.parkVehicle(this.parkForm.value)
-      .pipe(finalize(() => {
-        this.isParking = false;
-        this.cdr.markForCheck();
-      }))
-      .subscribe({
-        next: (res) => {
-          this.parkingResult = res;
-          this.getSpaces(); // This will now trigger a UI update
-        },
-        error: (err) => { this.apiError = err.error?.title || 'An unknown error occurred.'; this.cdr.markForCheck(); },
-        complete: () => this.cdr.markForCheck()
-      });
+    this.exitResult = result;
+    this.spacesStatusComponent.refresh(); // Tell the status component to update
   }
 
-  onExitSubmit(): void {
-    if (this.exitForm.invalid || this.isExiting) return;
+  onError(message: string): void {
     this.resetState();
-    this.isExiting = true;
-    this.carParkService.exitVehicle(this.exitForm.value)
-      .pipe(finalize(() => {
-        this.isExiting = false;
-        this.cdr.markForCheck();
-      }))
-      .subscribe({
-        next: (res) => {
-          this.exitResult = res;
-          this.getSpaces(); // This will now trigger a UI update
-        },
-        error: (err) => { this.apiError = err.error?.title || 'An unknown error occurred.'; this.cdr.markForCheck(); },
-        complete: () => this.cdr.markForCheck()
-      });
+    this.apiError = message;
   }
 
   private resetState(): void {
     this.parkingResult = null;
     this.exitResult = null;
     this.apiError = null;
-    this.cdr.markForCheck();
   }
 }

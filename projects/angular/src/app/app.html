@@ -1,51 +1,17 @@
 <!-- src/app/app.component.html -->
 
 <main class="container">
-  <header>
-    <h1>Car Park</h1>
-    <!-- Check if spacesStatus has data before trying to display it -->
-    @if (spacesStatus) {
-      <article>
-        <p>Available Spaces: <strong>{{ spacesStatus.availableSpaces }}</strong></p>
-        <p>Occupied Spaces: <strong>{{ spacesStatus.occupiedSpaces }}</strong></p>
-      </article>
-    } @else {
-      <!-- This block shows while data is loading or if it fails -->
-      <p><progress indeterminate></progress>Loading parking status...</p>
-    }
-  </header>
+  <!-- The new component for displaying the car park status -->
+  <app-spaces-status></app-spaces-status>
 
   <div class="grid">
-    <article>
-      <hgroup>
-        <h2>Park a Vehicle</h2>
-        <h3>Enter vehicle details to park.</h3>
-      </hgroup>
-        <form [formGroup]="parkForm" (ngSubmit)="onParkSubmit()">
-          <label for="park-reg">Vehicle Registration</label>
-          <input id="park-reg" formControlName="vehicleReg" placeholder="e.g., AB12 CDE" required />
-
-          <label for="park-type">Vehicle Type</label>
-          <select id="park-type" formControlName="vehicleType" required>
-            @for(type of vehicleTypeOptions; track type.value) {
-              <option [value]="type.value">{{ type.name }}</option>
-            }
-          </select>
-          <button type="submit" [disabled]="parkForm.invalid" [attr.aria-busy]="isParking">Park Vehicle</button>
-        </form>
-    </article>
-
-    <article>
-      <hgroup>
-        <h2>Exit Car Park</h2>
-        <h3>Enter registration to calculate charge.</h3>
-      </hgroup>
-        <form [formGroup]="exitForm" (ngSubmit)="onExitSubmit()">
-          <label for="exit-reg">Vehicle Registration</label>
-          <input id="exit-reg" formControlName="vehicleReg" placeholder="e.g., AB12 CDE" required />
-          <button type="submit" [disabled]="exitForm.invalid" [attr.aria-busy]="isExiting">Exit Vehicle</button>
-        </form>
-    </article>
+    <!-- The new component for parking a vehicle.
+         We listen for its output events to handle success and errors. -->
+    <app-park-vehicle (vehicleParked)="onVehicleParked($event)" (parkError)="onError($event)"></app-park-vehicle>
+    
+    <!-- The new component for exiting a vehicle.
+         We listen for its output events as well. -->
+    <app-exit-vehicle (vehicleExited)="onVehicleExited($event)" (exitError)="onError($event)"></app-exit-vehicle>
   </div>
 
   <section class="results">
