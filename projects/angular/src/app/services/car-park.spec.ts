@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
 
+import { environment } from '../../environments/environment';
 import { CarParkService, ParkingRequest, SpacesResponse, VehicleType } from './car-park';
 
 describe('CarParkService', () => {
@@ -19,8 +20,7 @@ describe('CarParkService', () => {
     });
     service = TestBed.inject(CarParkService);
     httpTestingController = TestBed.inject(HttpTestingController);
-    // Access the private member for testing purposes to ensure our URLs are correct
-    apiUrl = (service as any).apiUrl;
+    apiUrl = environment.httpApiUrl; // Use the apiUrl from the environment file
   });
 
   afterEach(() => {

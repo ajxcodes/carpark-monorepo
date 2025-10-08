@@ -32,6 +32,7 @@ CERT_PASSWORD="your_secure_dev_password" # IMPORTANT: Use a strong password in p
 
 # Define the Swagger UI URL
 SWAGGER_URL="https://localhost:7175/swagger"
+ANGULAR_APP_URL="http://localhost:4200"
 
 # Function to wait for a URL to be accessible
 wait_for_url() {
@@ -141,9 +142,12 @@ start_services() {
         echo "Services started successfully in detached mode."
         echo "You can access your API (e.g., Swagger UI) at $SWAGGER_URL"
         
-        # Wait for the Swagger UI to be accessible and then open it
+        # Wait for the services to be accessible and then open them
         if wait_for_url "$SWAGGER_URL"; then
             open_browser "$SWAGGER_URL"
+        fi
+        if wait_for_url "$ANGULAR_APP_URL"; then
+            open_browser "$ANGULAR_APP_URL"
         fi
     else
         echo "Failed to start services. Please check the output above for errors."
@@ -162,29 +166,34 @@ stop_services() {
     fi
 }
 
-# Main menu loop
-while true; do
-    echo "" # Add a blank line for readability
-    echo "Choose an option:"
-    echo "1) Start services (configure certs if needed, then $COMPOSE_CMD up -d)"
-    echo "2) Stop services ($COMPOSE_CMD down)"
-    echo "q) Quit"
+main() {
+    # Main menu loop
+    while true; do
+        echo "" # Add a blank line for readability
+        echo "Choose an option:"
+        echo "1) Start services (configure certs if needed, then $COMPOSE_CMD up -d)"
+        echo "2) Stop services ($COMPOSE_CMD down)"
+        echo "q) Quit"
 
-    read -p "Enter your choice: " choice
+        read -p "Enter your choice: " choice
 
-    case "$choice" in
-        1)
-            start_services
-            ;;
-        2)
-            stop_services
-            ;;
-        q|Q)
-            echo "Exiting."
-            break # Exit the loop
-            ;;
-        *)
-            echo "Invalid choice. Please enter 1, 2, or q."
-            ;;
-    esac
-done
+        case "$choice" in
+            1)
+                start_services
+                ;;
+            2)
+                stop_services
+                ;;
+            q|Q)
+                echo "Exiting."
+                break # Exit the loop
+                ;;
+            *)
+                echo "Invalid choice. Please enter 1, 2, or q."
+                ;;
+        esac
+    done
+}
+
+# Execute the main function
+main

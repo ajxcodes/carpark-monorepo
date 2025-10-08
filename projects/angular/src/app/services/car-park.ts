@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
+import { environment } from '../../environments/environment';
 // This interface matches the SpacesResponse from your .NET API.
 export interface SpacesResponse {
   availableSpaces: number;
@@ -47,7 +48,8 @@ export interface ParkingCompletedResponse {
 })
 export class CarParkService {
   // Replace with your actual .NET API base URL
-  private apiUrl = 'http://localhost:5118'; // Using the HTTPS URL from your previous error log
+  // API URL is now configured in src/environments/environment.ts
+  private apiUrl = environment.httpApiUrl;
 
   constructor(private http: HttpClient) { }
 
