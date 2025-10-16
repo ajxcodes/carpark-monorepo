@@ -1,5 +1,13 @@
 # Car Park
 
+## Stack
+- .NET API following Clean Architecture
+- PostgreSQL
+- Angular
+- React (same FE app as above but just in React)
+- Docker / Docker Compose
+- Bash
+
 ## Execution
 1. Open this repo in a terminal session
 2. Run `./run.sh` to bring up the CLI context menu to execute the Car Park API
