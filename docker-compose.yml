@@ -3,12 +3,23 @@ services:
   angular:
     container_name: "angular"
     build:
-      context: ./projects/angular # Build context is now the angular project folder
-      dockerfile: Dockerfile # Dockerfile is at the root of the context
+      context: ./projects/angular
+      dockerfile: Dockerfile
     ports:
-      - "4200:4000" # Map host port 4200 to container port 4200
+      - "4200:4000"
     networks:
       - car-park-network
+
+  react: # <-- NEW SERVICE DEFINITION
+    container_name: "react"
+    build:
+      context: ./projects/react
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000" # Map host port 3000 to container port 3000
+    networks:
+      - car-park-network
+
   dotnet:
     container_name: "dotnet"
     build:

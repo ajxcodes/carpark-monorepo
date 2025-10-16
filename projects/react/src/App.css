@@ -1,0 +1,11 @@
+.results {
+  margin-top: 2rem;
+}
+
+.error-card {
+  /* Use Pico's CSS variables for consistency */
+  border: 1px solid var(--pico-form-element-invalid-border-color);
+  background-color: var(--pico-form-element-invalid-background-color);
+  color: var(--pico-form-element-invalid-color);
+  border-radius: var(--pico-border-radius);
+}

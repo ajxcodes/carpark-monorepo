@@ -30,9 +30,10 @@ CERT_FILE="aspnetapp.pfx"
 CERT_PATH="$CERT_DIR/$CERT_FILE"
 CERT_PASSWORD="your_secure_dev_password" # IMPORTANT: Use a strong password in production, or better, use a proper certificate management solution.
 
-# Define the Swagger UI URL
+# Define the application URLs
 SWAGGER_URL="https://localhost:7175/swagger"
 ANGULAR_APP_URL="http://localhost:4200"
+REACT_APP_URL="http://localhost:3000" # <-- NEW URL
 
 # Function to wait for a URL to be accessible
 wait_for_url() {
@@ -43,7 +44,7 @@ wait_for_url() {
 
     echo "Waiting for $url to be accessible..."
     while [ $attempt -le $max_attempts ]; do
-        # Added -L to follow redirects
+        # Added -k to ignore self-signed certificate errors and -L to follow redirects
         status_code=$(curl -k -s -L -o /dev/null -w "%{http_code}" "$url")
         if [ "$status_code" -eq 200 ]; then
             echo "$url is accessible."
@@ -131,16 +132,14 @@ start_services() {
     fi
 
     # 2. Set environment variables for the certificate in the container
-    # These variables will be picked up by docker-compose and passed to the 'api' service
     export ASPNETCORE_Kestrel__Certificates__Default__Path="/home/app/.aspnet/https/$CERT_FILE"
     export ASPNETCORE_Kestrel__Certificates__Default__Password="$CERT_PASSWORD"
 
-    # 3. Run compose up -d
-    echo "Running '$COMPOSE_CMD up -d' with certificate environment variables..."
-    $COMPOSE_CMD up -d
+    # 3. Run compose up -d with --build
+    echo "Running '$COMPOSE_CMD up -d --build'..."
+    $COMPOSE_CMD up -d --build
     if [ $? -eq 0 ]; then
         echo "Services started successfully in detached mode."
-        echo "You can access your API (e.g., Swagger UI) at $SWAGGER_URL"
         
         # Wait for the services to be accessible and then open them
         if wait_for_url "$SWAGGER_URL"; then
@@ -148,6 +147,10 @@ start_services() {
         fi
         if wait_for_url "$ANGULAR_APP_URL"; then
             open_browser "$ANGULAR_APP_URL"
+        fi
+        # NEW: Wait for and open the React app
+        if wait_for_url "$REACT_APP_URL"; then
+            open_browser "$REACT_APP_URL"
         fi
     else
         echo "Failed to start services. Please check the output above for errors."
@@ -171,7 +174,7 @@ main() {
     while true; do
         echo "" # Add a blank line for readability
         echo "Choose an option:"
-        echo "1) Start services (configure certs if needed, then $COMPOSE_CMD up -d)"
+        echo "1) Start services (configure certs if needed, then $COMPOSE_CMD up -d --build)"
         echo "2) Stop services ($COMPOSE_CMD down)"
         echo "q) Quit"
 
